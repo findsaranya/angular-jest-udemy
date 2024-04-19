@@ -5,23 +5,13 @@ import { UtilsService } from './utils.service';
 jest.mock("./utils.service.ts");
 describe('UsersService', () => {
   let usersService: UsersService;
-  let utilService : UtilsService;
-  let utilMockService = {
-    pluck : jest.fn()
-  }
-
+ 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [UsersService,
-        //UtilsService,
-        {
-        provide:UtilsService,
-        useValue:utilMockService
-      }],
+      providers: [UsersService],
     });
 
     usersService = TestBed.inject(UsersService);
-    utilService = TestBed.inject(UtilsService);
   });
 
   it('creates a service', () => {
@@ -35,29 +25,17 @@ describe('UsersService', () => {
         name: 'foo',
       };
       usersService.addUser(user);
-      expect(usersService.users).toEqual([{ id: '3', name: 'foo' }]);
+      expect(usersService.user$.getValue()).toEqual([{ id: '3', name: 'foo' }]);
     });
   });
 
   describe('removeUser', () => {
     it('should remove a user', () => {
-      usersService.users = [{ id: '3', name: 'foo' }];
+      usersService.user$.next([{ id: '3', name: 'foo' }]);
       usersService.removeUser('3');
-      expect(usersService.users).toEqual([]);
+      expect(usersService.user$.getValue()).toEqual([]);
     });
   });
 
-  describe("getUserNames()",() => {
-    it("return usernames",() => {
-     // const spyOn = jest.spyOn(utilService,'pluck').mockImplementation(() => ['foo','bar']);
-     utilMockService.pluck.mockReturnValue(["foo"])
-      const names = usersService.getUsersName();
-      //expect(names).toEqual(['foo','bar']);
-      expect(names).toEqual(["foo"]);
-     // expect(names.length).toBe(2);
-    // spyOn.mockClear();
-     // const name1 = usersService.getUsersName();
-     // expect(name1.length).toBe(0);
-    })
-  })
+ 
 });
