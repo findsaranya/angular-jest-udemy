@@ -1,21 +1,21 @@
 import {
   HttpClientTestingModule,
-  HttpTestingController
+  HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 
-
 import { ApiService } from './api.service';
 import { TagInterface } from '../types/tag.interface';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('ApiService', () => {
   let service: ApiService;
-  let httpTestingController : HttpTestingController;
+  let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers:[ApiService],
-      imports:[HttpClientTestingModule]
+      providers: [ApiService],
+      imports: [HttpClientTestingModule],
     });
     service = TestBed.inject(ApiService);
     httpTestingController = TestBed.inject(HttpTestingController);
@@ -23,26 +23,30 @@ describe('ApiService', () => {
 
   afterEach(() => {
     httpTestingController.verify();
-  })
+  });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('getTags',() => {
-    it("should return a list of tags",() => {
-      let tags : TagInterface[] | undefined;
-      service.getTags().subscribe(response => tags=response);
-      const req = httpTestingController.expectOne(service.apiUrl+'/tags');
-      req.flush([{
-        id:"1",
-        name:"foo"
-      }])
-      expect(tags).toEqual([{
-        id:'1',
-        name:"foo"
-      }]);
-    })
+  describe('getTags', () => {
+    it('should return a list of tags', () => {
+      let tags: TagInterface[] | undefined;
+      service.getTags().subscribe((response) => (tags = response));
+      const req = httpTestingController.expectOne(service.apiUrl + '/tags');
+      req.flush([
+        {
+          id: '1',
+          name: 'foo',
+        },
+      ]);
+      expect(tags).toEqual([
+        {
+          id: '1',
+          name: 'foo',
+        },
+      ]);
+    });
   });
 
   describe('createTag', () => {
@@ -67,6 +71,26 @@ describe('ApiService', () => {
       expect(req.request.body).toEqual({ name: 'foo' });
     });
 
+    it('throws an error', () => {
+      let actualError: HttpErrorResponse | undefined;
+      service.createTag('foo').subscribe({
+        next: () => {
+          fail('success should not be called');
+        },
+        error: (error: HttpErrorResponse) => {
+          actualError = error;
+        },
+      });
+      const req = httpTestingController.expectOne('http://localhost:3004/tags');
+      req.flush('Server Error', {
+        status: 422,
+        statusText: 'Unprocessed Entity',
+      });
+      if (!actualError) {
+        throw new Error('Errors need to be defined');
+      }
+      expect(actualError.status).toBe(422);
+      expect(actualError.statusText).toEqual('Unprocessed Entity');
+    });
   });
-
 });
