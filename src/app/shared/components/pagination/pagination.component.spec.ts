@@ -7,14 +7,25 @@ import { first, take, toArray } from 'rxjs';
 describe('PaginationComponent', () => {
   let component: PaginationComponent;
   let fixture: ComponentFixture<PaginationComponent>;
+  let utilsService: UtilsService;
+  let mockUtil = {
+    range: () => [1, 2, 3, 4, 5],
+  };
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [PaginationComponent],
-      providers: [UtilsService],
+      providers: [
+        //UtilsService,
+        {
+          provide: UtilsService,
+          useValue: mockUtil,
+        },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PaginationComponent);
     component = fixture.componentInstance;
+    utilsService = TestBed.inject(UtilsService);
     component.total = 50;
     component.limit = 10;
     component.currentPage = 1;
